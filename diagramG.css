@@ -1,0 +1,164 @@
+@font-face {
+    font-family: 'CrimsonRoman';
+    src: url('fonts/crimson-roman-webfont.eot');
+    src: url('fonts/crimson-roman-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/crimson-roman-webfont.woff') format('woff'),
+         url('fonts/crimson-roman-webfont.ttf') format('truetype'),
+         url('fonts/crimson-roman-webfont.svg#CrimsonRoman') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+            #c1 {
+                /*border: solid 2px gray;*/
+                display: none;
+                margin: 0 auto;
+            }
+            #saveImg {
+                display: block;
+                margin: 0 auto;
+            }
+            form {
+                margin-left: 15px;
+            }
+            #UFunc {
+                font-family: Monospace;
+                font-size:0.9em;
+                width: 250px;
+                
+            }
+            #rowsDisplay {
+                display: inline;
+            }
+            
+            #rowControl {
+                width: 615px;
+                margin: 0 auto;
+                font-size: 0.9em;
+            }
+            #rangeInput {
+                width: 530px;
+            }
+            #tileBox {
+                width: 620px;
+                min-height: 164px;
+                margin: 0 auto;
+            }
+            .tile {
+                float: left;
+                background-color: rgba(255,255,255,255);
+                /*min-width: 200px;
+                max-width: 200px;
+                height: 80px;*/
+                width: 196px;
+                height: 76px;
+                padding: 0;
+                border: solid 2px #a6a6a6;
+                margin: 1px;
+                text-align: center;
+                font-family: 'CrimsonRoman';
+                font-size: 13px; /* = 1em in Google Chrome */
+                cursor: default;
+            }
+            .tile:hover {
+                background-color: #cccccc;
+            }
+            .tile:active {
+                background-color: #b3b3b3;
+            }
+            .activeTile {
+               background-color: #d9d9d9;
+               /*border: solid 2px black;*/
+               color: black;
+            }
+            #tile-PromptOff {
+                width: 200px;
+                height: 80px;
+                color: #a6a6a6;
+                font-size: 20px; /* = 1.2em regular in Google Chrome */
+            }
+            #tile-PromptOff:hover {
+                color: #8c8c8c;
+            }
+            #tile-PromptOff:active {
+                color: #d9d9d9;
+            }
+            #tile-PromptOn {
+                display: none;
+                height: 76px;
+                min-width: 192px;
+                max-width: 596px;
+            }
+            .Ftitle {
+                font-size: 16px; /* = 1.2em bold in Google Chrome */
+            }
+            input {
+                display: inline;
+            }
+            #funcName {
+                width: 30px;
+                background: rgba(255,255,255,0);
+            }
+            #funcNameEcho {
+                display: inline;
+                width: 30px;
+                height: 10px;
+            }
+           #funcDefP, #funcDef0 {
+                width: 90px;
+                font-size: 0.9em;
+                background: rgba(255,255,255,0);
+           }
+           #promptButtons {
+                width: 200px;
+                position: absolute;
+                z-index: 5;
+           }
+           .promptButton {
+                border: solid 2px #a6a6a6;
+                background: white;
+                font-family: 'CrimsonRoman';
+           }
+           .promptButton:hover {
+                background: #cccccc;
+           }
+            .del {
+                float: right;
+                /*font-size: 0.9em;*/
+                font-style: bold;
+                border: none;
+                padding: 2px;
+                margin: 0px 4px;
+                background: rgba(255,255,255,0);
+                color: rgba(255,255,255,255);
+            }
+            .del:hover {
+                color: red;
+            }
+            .del:active {
+                color: black;
+            }
+            .tileLabel {
+                margin: 0;
+                padding: 0;
+                position: relative;
+                top: 25%;
+                left: 12%;
+                float: left;
+            }    
+           footer {
+                clear: both;
+                margin: 0 auto;
+                font-size: 0.8em;
+                color: #8c8c8c;
+                text-align: center;
+                margin-top: 20px;
+                padding-top: 80px; 
+            }
+            table {
+            /*    border-collapse: collapse;*/
+                margin: 0 auto;
+            }
+            td {
+                padding: 0;
+            }

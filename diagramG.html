@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GEB Diagram Generator</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="diagramG.css">
+        <style type="text/css">
+        </style>
+        <script src="html5slider.js"></script>
+        <script src="diagramG.js"></script>
+        <script>
+            var activeTile;
+
+            function Tile(id,funcBody, initFlag) {
+                this.id = id;
+                this.func = new Function('n',funcBody);
+                this.func.lookup = {};
+                this.button = document.createElement("div");
+                this.button.setAttribute("class","tile divtile");
+                this.button.setAttribute("id",id);
+                this.button.setAttribute("onclick","makeActive(this.id)");
+                //this.button.innerHTML = funcBody;
+                if (!initFlag) {
+                    var del = document.createElement("button");
+                    del.setAttribute("class","del");
+                    del.setAttribute("title","Delete Function");
+                    del.setAttribute("onclick","delTile('" + this.id + "')");
+                    del.innerHTML = 'x';
+                    del.addEventListener("click",stopEvent,false);
+                }
+                //this.button.appendChild(del);
+                this.label = document.createElement("p");
+                this.label.setAttribute("class","tileLabel");
+                this.label.innerHTML = funcBody;
+                //this.button.appendChild(this.label);
+                this.addTo = function (parentElement) {
+                    parentElement.appendChild(this.button);
+                    if (!initFlag) {
+                        this.button.appendChild(del);
+                    }
+                    this.button.appendChild(this.label);
+                }
+                this.addBefore = function (parentElement,indexElement)  {
+                    parentElement.insertBefore(this.button,indexElement);
+                    if (!initFlag) {
+                        this.button.appendChild(del);
+                    }
+                    this.button.appendChild(this.label);
+                }
+                this.cache = 0;
+            }
+            functionCatalog = new Object;
+            
+            function delTile(tileId) {
+                conf = confirm("Confirm Function Delete:");
+                if (conf) {
+                    tileBox = document.getElementById("tileBox");
+                    tileDiv = document.getElementById(tileId);
+                    tileBox.removeChild(tileDiv);
+                    if (activeTile == functionCatalog[tileId]) {
+                        makeActive('G');
+                    }
+                    delete(functionCatalog[tileId]);
+                }
+                // Tiles 1 & 2 non-removable: Simplifies managing order of tiles after removal vis-a-vis "Define Func" tile.
+            }
+            
+            function stopEvent(ev) {
+                ev.stopPropagation();
+            }
+            
+            function init() {
+                // Instantiate Default Function Tiles
+                addTile('G(n)','n - G(G(n-1))','0',1);
+                addTile('M(n)','n - F(M(n-1))','0',1);
+                addTile('H(n)','n - H(H(H(n-1)))','0',1);
+                addTile('F(n)','n - M(F(n-1))','1',1);
+                // Fire up Diagram Generator
+                makeActive(functionCatalog.G.id);
+                // Restore User Functions From Local Storage
+                 
+            }
+
+            function makeActive(id) {
+                var c1 = document.getElementById("c1");
+                tile = functionCatalog[id];
+                if (activeTile) {
+                    activeTile.button.setAttribute("class", "tile");
+                }
+                tile.button.setAttribute("class", "tile activeTile");
+                activeTile = tile;
+                rows = Number(document.getElementById('rangeInput').value);
+                //var executeString = "diagramGenerator(" + activeTile.func + ", " + String(rows) + ", " + "c1," + activeTile.cache + ");";
+                //eval(executeString);
+                activeTile.cache = diagramGenerator(activeTile.func,rows,c1,activeTile.cache);
+                var dataURL = c1.toDataURL();
+                document.getElementById("saveImg").src = dataURL;
+            }
+            
+            function rowsCtrl() {
+                var rowsOutput = document.getElementById("rowsDisplay");
+                makeActive(activeTile.id);
+                rowsOutput.innerHTML = document.getElementById('rangeInput').value;
+            }
+            
+            promptStatus = false;
+            function togglePrompt() {
+                var promptOff = document.getElementById("tile-PromptOff");
+                var promptOn = document.getElementById("tile-PromptOn");
+                if (!promptStatus) {
+                    promptOff.setAttribute("style", "display: none");
+                    promptOn.setAttribute("style", "display: block");
+                    document.getElementById("funcName").focus();
+                } else {
+                    promptOff.setAttribute("style", "display: block");
+                    promptOn.setAttribute("style", "display: none");
+                }
+                promptStatus = !promptStatus;
+            }            
+            
+            function fecho() {
+                var fName = document.getElementById("funcName");
+                var echoIt = document.getElementById("funcNameEcho");
+                echoIt.innerHTML = fName.value;
+                autotab(fName, document.getElementById("funcDefP"));
+            }
+            function autotab(idiv,dest) {
+                s = idiv.value;
+                l = s.charAt(s.length - 1);
+                if ((l == ')') && (s.match(/\(/g).length == s.match(/\)/g).length)) {
+                    dest.focus();
+                }
+            }   
+            
+            function addTileFromPrompt() {
+                var nameBlock = document.getElementById('funcName');
+                var defP = document.getElementById('funcDefP');
+                var def0 = document.getElementById('funcDef0');
+                addTile(nameBlock.value,defP.value,def0.value,0);
+                nameBlock.value = '';
+                defP.value = '';
+                def0.value = '';
+                document.getElementById("funcNameEcho").innerHTML = '';
+            }
+            
+            function addTile(nameBlock,defP,def0,initFlag) {
+                //funcString = nameBlock + " = " + defP //...
+                var funcInfo = eqParse(nameBlock,defP,def0,initFlag);
+                var funcName = funcInfo[0];
+                var varName = funcInfo[1];
+                var tileBox = document.getElementById("tileBox");
+                var promptOff = document.getElementById("tile-PromptOff");
+                var newTile = functionCatalog[funcName];
+                var funcStringLeft = "<span class='Ftitle'><b>" + funcName + "</b>(<i>" + varName + "</i>)</span> = ";
+                var funcStringLeft2 = funcName + "(<i>" + varName + "</i>) = ";
+                var funcString = funcStringLeft + defP + " for " + varName + " > 0</br>" +
+                                 funcStringLeft2 + def0 + " for " + varName + " = 0";
+                newTile.label.innerHTML = funcString;
+                if (tileBox.children.length < 4) {
+                    //tileBox.insertBefore(newTile.button,promptOff);
+                    newTile.addBefore(tileBox,promptOff);
+                } else {
+                    newTile.addTo(tileBox);
+                }
+                //alert(functionCatalog[newTile.id].func);
+                if (!initFlag) {
+                    makeActive(newTile.id);
+                    togglePrompt();
+                }
+               /* var localbackup = new Object;
+                localbackup.nameBlock = nameBlock;
+                localbackup.defP = defP;
+                localbackup.def0 = def0;
+                localStorage[backupOrder] = JSON.stringify(localbackup);
+                backupOrder += 1; */
+            }
+            function eqParse(nameBlock,defP,def0, initFlag) {
+                var funcName = nameBlock.split(/\(/)[0];
+                var varName = nameBlock.split(/\(/)[1].split(/\)/)[0];
+                var nameRegex = new RegExp(funcName, "g");
+                var varRegex = new RegExp(varName, "g");
+                var otherFRegex = new RegExp(/[A-Z]+/g);                   
+                var almostNormalizedDefP = defP.replace(nameRegex,"arguments.callee").replace(varRegex,"n");
+                var almostNormalizedDef0 = def0.replace(varRegex,"arguments.callee").replace(varRegex,"n");
+                var extFuncRefHandler = function(almostNormalizedString) {
+                    var extFuncRefs = almostNormalizedString.match(otherFRegex);
+                    for (ref in extFuncRefs) {
+                        var rawRef = extFuncRefs[ref];
+                        almostNormalizedString = almostNormalizedString.replace(rawRef,"functionCatalog." + String(rawRef) + ".func");
+                    }
+                    return almostNormalizedString;
+                }
+                normalizedDefP = extFuncRefHandler(almostNormalizedDefP);
+                normalizedDef0 = extFuncRefHandler(almostNormalizedDef0);
+                var addToCatalog = function() {
+                    if (typeof functionCatalog[funcName] === 'undefined') {
+                        funcBody = "if (!(arguments.callee.lookup[n]))  { if (n==0) { arguments.callee.lookup[n] =" + normalizedDef0 + ";} else { arguments.callee.lookup[n] = " + normalizedDefP + "; }} return arguments.callee.lookup[n]";
+                        //funcObj = new Function('n',funcBody);
+                        functionCatalog[funcName] = new Tile(funcName,funcBody,initFlag);
+                    } else {
+                        alert("name collision detected: correcting");
+                        funcName = funcName + funcName;
+                        addToCatalog();
+                    }
+                }
+                addToCatalog();
+                return [funcName,varName];
+            }        
+        </script>
+    </head>
+    <body onload="init()">
+        <canvas id="c1" width="740px" height="400px"></canvas>
+        <img id="saveImg" title="Right click to save diagram."></img>
+        <div id="rowControl">
+            <label for="rows">Rows: </label>
+            <input id = "rangeInput" type="range" name="rows" min="1" max="20" value="5" onchange="rowsCtrl()">
+            <div id="rowsDisplay">5</div>
+        </div>
+        <div id="tileBox">
+            <button id="tile-PromptOff" class="tile" onclick="togglePrompt()">Define New Function</button>
+            <div id="tile-PromptOn" class="tile">
+                Enter a well-formed funtion:</br>
+                <table>
+                    <tr>
+                        <td><input type="text" id="funcName" onkeyup="fecho()"></td>
+                        <td>=</td>
+                        <td><input type="text" id="funcDefP" onkeyup="autotab(this,document.getElementById('funcDef0'))"></td>
+                        <td>for</td>
+                        <td> ? > 0</td>
+                    <tr>
+                        <td class="col1"><div id="funcNameEcho"></div></td>
+                        <td class="col2">=</td>
+                        <td><input type="text" id="funcDef0" onkeyup="autotab(this,document.getElementById('gendButton'))"></td>
+                        <td>for</td>
+                        <td> ? = 0</td>
+                    </tr>
+                </table>
+                <div id="promptButtons">
+                    <button class="promptButton" id="gendButton" onclick="addTileFromPrompt()">Generate Diagram</button>
+                    <button class="promptButton" onclick="togglePrompt()">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <p>© 2012 Gallus Absurd</p>
+        </footer>
+    </body>
+</html>
+   
